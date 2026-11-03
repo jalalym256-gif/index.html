@@ -1,0 +1,458 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ماشین‌حساب قلب</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  /* Layout: plum-dark pocket calculator; win card with a handsome anime gentleman holding a heart, then a yes/no question; final heart-explosion screen; dedication footer pinned on every screen. Single committed dark look. */
+  :root{
+    --bg:#1c1428; --panel:#2a1f3d; --screen:#150e20; --key:#3b2c55; --key-hi:#4b3a69;
+    --accent:#ff5c8a; --accent-d:#e0396b; --gold:#f2c14e; --text:#f6ecff; --muted:#b9a6d4; --danger:#ff8a9c;
+    --font:"Vazirmatn",Tahoma,"Segoe UI",sans-serif;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  html{height:100%}
+  body{
+    margin:0;min-height:100%;
+    direction:rtl;font-family:var(--font);
+    background:radial-gradient(120% 80% at 50% 0%,#2e2046 0%,var(--bg) 60%);
+    color:var(--text);
+    display:flex;align-items:center;justify-content:center;
+    padding-block:20px 76px;
+    padding-left:max(16px, env(safe-area-inset-left, 0px));
+    padding-right:max(16px, env(safe-area-inset-right, 0px));
+  }
+  .calc{
+    width:100%;max-width:340px;direction:ltr;
+    background:var(--panel);border-radius:26px;padding:16px;
+    box-shadow:0 24px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .screen{
+    background:var(--screen);border-radius:16px;padding:12px 16px;margin-bottom:14px;
+    min-height:104px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;overflow:hidden;
+  }
+  .msg{direction:rtl;align-self:flex-start;font-size:15px;font-weight:600;color:var(--muted);min-height:24px}
+  .msg.bad{color:var(--danger)}
+  .expr{
+    font-size:38px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:.5px;
+    max-width:100%;overflow-x:auto;white-space:nowrap;scrollbar-width:none;
+  }
+  .expr::-webkit-scrollbar{display:none}
+  .screen.shake{animation:shake .45s}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+  .keys{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .keys button{
+    font-family:var(--font);font-size:24px;font-weight:600;color:var(--text);
+    background:var(--key);border:0;border-radius:16px;height:58px;cursor:pointer;
+    transition:transform .1s, background .15s;touch-action:manipulation;
+  }
+  .keys button:hover{background:var(--key-hi)}
+  .keys button:active{transform:scale(.94)}
+  .keys button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  .keys .op{background:#573a7d}
+  .keys .fn{background:#2f2346;color:var(--muted)}
+  .keys .eq{background:var(--accent);grid-row:span 2;height:auto;font-size:30px}
+  .keys .eq:hover{background:var(--accent-d)}
+  .keys .zero{grid-column:span 2}
+
+  footer{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;text-align:center;pointer-events:none;
+    padding-top:12px;
+    padding-bottom:calc(14px + env(safe-area-inset-bottom, 0px));
+    padding-left:max(16px, env(safe-area-inset-left, 0px));
+    padding-right:max(16px, env(safe-area-inset-right, 0px));
+    font-size:16px;font-weight:600;color:#ffc2d4;
+    background:linear-gradient(to top,rgba(20,12,30,.9) 55%,transparent);
+  }
+
+  /* win screen */
+  .win,.boom{
+    position:fixed;inset:0;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding-left:max(16px, env(safe-area-inset-left, 0px));
+    padding-right:max(16px, env(safe-area-inset-right, 0px));
+  }
+  .win{
+    z-index:20;overflow-y:auto;padding-block:20px 84px;
+    background:radial-gradient(100% 70% at 50% 28%,#4a3418 0%,#1a1220 70%);
+  }
+  .win[hidden],.boom[hidden]{display:none}
+  .win-inner{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:380px;width:100%;margin:auto}
+  .hero{width:min(58vw,230px);height:auto;flex:none;animation:bob 3.4s ease-in-out infinite;filter:drop-shadow(0 16px 22px rgba(0,0,0,.4))}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  .heart{transform-box:fill-box;transform-origin:center;animation:beat 1.2s ease-in-out infinite}
+  @keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+  .win h1{margin:0;font-size:23px;font-weight:800;line-height:1.8;text-wrap:balance}
+  .win h1 span{color:var(--gold)}
+  .win h2{margin:4px 0 0;font-size:20px;font-weight:600;color:#ffe2ec}
+  .choices{display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap;min-height:64px;--yes:1;--no:1}
+  .choices button{font-family:var(--font);font-weight:800;border-radius:999px;cursor:pointer;transition:font-size .3s, padding .3s;touch-action:manipulation;line-height:1.3}
+  .choices .yes{
+    font-size:calc(20px * var(--yes));padding:calc(9px * var(--yes)) calc(34px * var(--yes));
+    background:var(--accent);color:#fff;border:0;box-shadow:0 8px 22px rgba(255,92,138,.45);
+  }
+  .choices .yes:hover{background:var(--accent-d)}
+  .choices .no{
+    font-size:calc(18px * var(--no));padding:calc(8px * var(--no)) calc(26px * var(--no));
+    background:transparent;color:var(--muted);border:2px solid #7a5aa8;
+  }
+  .choices button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+  .warn{margin:0;min-height:28px;font-size:17px;font-weight:600;color:#ffd37a}
+  .warn[hidden]{display:block;visibility:hidden}
+
+  /* explosion screen */
+  .boom{
+    z-index:25;overflow:hidden;flex-direction:column;
+    background:radial-gradient(90% 60% at 50% 45%,#5a1f4a 0%,#1a1020 75%);
+  }
+  #boomC{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .boom-text{
+    position:relative;z-index:2;font-size:clamp(32px,10vw,50px);font-weight:800;line-height:1.7;color:#fff;
+    text-shadow:0 4px 26px rgba(255,92,138,.8);text-wrap:balance;animation:throb .9s ease-in-out infinite;padding:0 8px;
+  }
+  @keyframes throb{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+  #pops{position:absolute;inset:0;pointer-events:none;z-index:3}
+  .pop{
+    position:absolute;white-space:nowrap;font-weight:800;text-shadow:0 2px 14px rgba(0,0,0,.45);
+    animation:pop 1.8s ease-out forwards;
+  }
+  @keyframes pop{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}
+    15%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}
+    100%{opacity:0;transform:translate(-50%,-90%) scale(1)}
+  }
+  .restart{
+    position:absolute;z-index:4;bottom:calc(76px + env(safe-area-inset-bottom, 0px));
+    font-family:var(--font);font-size:15px;font-weight:600;color:var(--text);
+    background:rgba(0,0,0,.25);border:2px solid #b0709a;border-radius:999px;padding:8px 22px;cursor:pointer;
+  }
+  .restart:hover{background:rgba(0,0,0,.4)}
+  .restart:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+  @media (prefers-reduced-motion:reduce){.hero,.heart,.screen.shake,.boom-text{animation:none}}
+</style>
+
+<main class="calc" aria-label="ماشین حساب">
+  <div class="screen" id="screen">
+    <div class="msg" id="msg">یه عدد بزن و برابر رو بزن</div>
+    <div class="expr" id="expr" aria-live="polite">0</div>
+  </div>
+  <div class="keys">
+    <button class="fn" data-k="C">C</button>
+    <button class="fn" data-k="B" aria-label="پاک کردن یک کاراکتر">⌫</button>
+    <button class="op" data-k="/">÷</button>
+    <button class="op" data-k="*">×</button>
+
+    <button data-k="7">7</button>
+    <button data-k="8">8</button>
+    <button data-k="9">9</button>
+    <button class="op" data-k="-">−</button>
+
+    <button data-k="4">4</button>
+    <button data-k="5">5</button>
+    <button data-k="6">6</button>
+    <button class="op" data-k="+">+</button>
+
+    <button data-k="1">1</button>
+    <button data-k="2">2</button>
+    <button data-k="3">3</button>
+    <button class="eq" data-k="=">=</button>
+
+    <button class="zero" data-k="0">0</button>
+    <button data-k=".">.</button>
+  </div>
+</main>
+
+<section class="win" id="win" hidden aria-live="polite">
+  <div class="win-inner">
+    <svg class="hero" viewBox="0 0 300 360" role="img" aria-label="پسر انیمه‌ای خوش‌تیپ با موهای مواج و کت مشکی که یک قلب بزرگ در دست دارد">
+      <defs>
+        <linearGradient id="heartG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#ff4a5e"/><stop offset="1" stop-color="#c8102e"/>
+        </linearGradient>
+        <linearGradient id="hairG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#34305c"/><stop offset="1" stop-color="#16122a"/>
+        </linearGradient>
+        <linearGradient id="goldG" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#ffe59a"/><stop offset=".5" stop-color="#f2c14e"/><stop offset="1" stop-color="#b9862a"/>
+        </linearGradient>
+        <linearGradient id="irisG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#14244f"/><stop offset=".55" stop-color="#2f6fd0"/><stop offset="1" stop-color="#8fd6ff"/>
+        </linearGradient>
+        <radialGradient id="glowG" cx=".5" cy=".5" r=".5">
+          <stop offset="0" stop-color="#f2c14e" stop-opacity=".38"/><stop offset="1" stop-color="#f2c14e" stop-opacity="0"/>
+        </radialGradient>
+        <clipPath id="eyeL"><path d="M106 150 C108 130 144 128 146 150 C144 166 108 168 106 150Z"/></clipPath>
+        <clipPath id="eyeR"><path d="M194 150 C192 130 156 128 154 150 C156 166 192 168 194 150Z"/></clipPath>
+      </defs>
+
+      <circle cx="150" cy="170" r="150" fill="url(#glowG)"/>
+
+      <!-- back hair -->
+      <path d="M72 128 C60 40 240 34 228 128 C246 170 240 214 222 244 C214 220 206 204 202 188 L98 188 C94 204 86 220 78 244 C60 214 54 170 72 128Z" fill="url(#hairG)"/>
+
+      <!-- blazer -->
+      <path d="M34 360 C34 284 84 250 150 250 C216 250 266 284 266 360Z" fill="#12121a"/>
+      <path d="M96 262 L128 250 L116 340 L70 340Z" fill="#1e1e2a"/>
+      <path d="M204 262 L172 250 L184 340 L230 340Z" fill="#1e1e2a"/>
+      <path d="M96 262 L70 340" stroke="url(#goldG)" stroke-width="1.8" fill="none" opacity=".85"/>
+      <path d="M204 262 L230 340" stroke="url(#goldG)" stroke-width="1.8" fill="none" opacity=".85"/>
+      <path d="M232 312 L252 300 L258 318Z" fill="url(#goldG)"/>
+      <path d="M236 314 L250 306 L252 316Z" fill="#fff6dc" opacity=".8"/>
+      <circle cx="58" cy="300" r="5" fill="url(#goldG)"/>
+
+      <!-- neck + open silk shirt -->
+      <path d="M136 200 L136 252 L164 252 L164 200Z" fill="#ecb48c"/>
+      <path d="M134 246 L150 292 L166 246 Q150 262 134 246Z" fill="#f2c09a"/>
+      <path d="M114 244 L142 262 L128 296 L102 262Z" fill="#22356b"/>
+      <path d="M186 244 L158 262 L172 296 L198 262Z" fill="#22356b"/>
+      <path d="M114 244 L142 262" stroke="#4a62a8" stroke-width="2" opacity=".7"/>
+      <path d="M186 244 L158 262" stroke="#4a62a8" stroke-width="2" opacity=".7"/>
+      <path d="M124 240 Q150 262 176 240" stroke="url(#goldG)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <circle cx="150" cy="252" r="5.5" fill="url(#goldG)"/>
+      <circle cx="148.5" cy="250.5" r="1.8" fill="#fff" opacity=".8"/>
+
+      <!-- face -->
+      <path d="M96 118 C96 74 204 74 204 118 L203 146 C201 178 178 206 150 212 C122 206 99 178 97 146Z" fill="#f9d1b0"/>
+      <path d="M118 200 C132 214 168 214 182 200 C174 216 126 216 118 200Z" fill="#e7a982" opacity=".5"/>
+      <ellipse cx="108" cy="171" rx="11" ry="6" fill="#ff8fa3" opacity=".38"/>
+      <ellipse cx="192" cy="171" rx="11" ry="6" fill="#ff8fa3" opacity=".38"/>
+
+      <!-- eyes: large, soft, anime style -->
+      <path d="M106 150 C108 130 144 128 146 150 C144 166 108 168 106 150Z" fill="#fff"/>
+      <g clip-path="url(#eyeL)">
+        <ellipse cx="126" cy="151" rx="12" ry="15.5" fill="url(#irisG)"/>
+        <ellipse cx="126" cy="152" rx="5.2" ry="8.5" fill="#0b1230"/>
+      </g>
+      <circle cx="120" cy="143" r="5" fill="#fff"/>
+      <circle cx="133" cy="158" r="2.4" fill="#fff" opacity=".9"/>
+      <path d="M104 148 C108 128 144 126 148 146" stroke="#1a1428" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M105 147 L98 141" stroke="#1a1428" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M110 160 Q126 168 142 160" stroke="#3a2a3a" stroke-width="1.5" fill="none" opacity=".5"/>
+
+      <path d="M194 150 C192 130 156 128 154 150 C156 166 192 168 194 150Z" fill="#fff"/>
+      <g clip-path="url(#eyeR)">
+        <ellipse cx="174" cy="151" rx="12" ry="15.5" fill="url(#irisG)"/>
+        <ellipse cx="174" cy="152" rx="5.2" ry="8.5" fill="#0b1230"/>
+      </g>
+      <circle cx="168" cy="143" r="5" fill="#fff"/>
+      <circle cx="181" cy="158" r="2.4" fill="#fff" opacity=".9"/>
+      <path d="M196 148 C192 128 156 126 152 146" stroke="#1a1428" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M195 147 L202 141" stroke="#1a1428" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M158 160 Q174 168 190 160" stroke="#3a2a3a" stroke-width="1.5" fill="none" opacity=".5"/>
+
+      <!-- brows, nose, smile -->
+      <path d="M106 124 Q126 115 146 122" stroke="#1d1830" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+      <path d="M154 122 Q174 115 194 124" stroke="#1d1830" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+      <path d="M149 169 Q151 174 155 171" stroke="#d29a78" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <path d="M139 188 Q150 198 162 188" stroke="#c0525f" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M146 194 Q150 197 155 194" stroke="#ff9aa8" stroke-width="2" fill="none" stroke-linecap="round" opacity=".7"/>
+
+      <!-- front hair: side-swept fringe + framing locks -->
+      <path d="M88 124 C84 56 216 52 212 124 C208 108 202 98 192 92 C190 108 182 120 172 124 C170 112 164 102 154 96 C152 110 144 122 134 128 C130 116 120 106 108 100 C106 110 98 118 88 124Z" fill="url(#hairG)"/>
+      <path d="M90 120 C80 150 84 182 96 206 C100 178 98 150 106 122Z" fill="url(#hairG)"/>
+      <path d="M210 120 C220 150 216 182 204 206 C200 178 202 150 194 122Z" fill="url(#hairG)"/>
+      <path d="M108 74 C136 58 172 58 194 78" stroke="#8fa4f0" stroke-width="4" fill="none" stroke-linecap="round" opacity=".6"/>
+      <path d="M96 96 C100 86 110 80 120 78" stroke="#8fa4f0" stroke-width="3" fill="none" stroke-linecap="round" opacity=".5"/>
+      <path d="M170 100 C176 106 180 112 180 118" stroke="#8fa4f0" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".5"/>
+
+      <!-- sparkles -->
+      <path transform="translate(242 76)" d="M0 -10 L2.8 -2.8 L10 0 L2.8 2.8 L0 10 L-2.8 2.8 L-10 0 L-2.8 -2.8Z" fill="url(#goldG)"/>
+      <path transform="translate(60 92) scale(.7)" d="M0 -10 L2.8 -2.8 L10 0 L2.8 2.8 L0 10 L-2.8 2.8 L-10 0 L-2.8 -2.8Z" fill="url(#goldG)"/>
+
+      <!-- gold-rimmed heart -->
+      <g transform="translate(33 86) scale(.78)">
+        <g class="heart">
+          <path d="M150 336 C52 272 62 196 112 196 C134 196 147 210 150 226 C153 210 166 196 188 196 C238 196 248 272 150 336Z" fill="url(#heartG)" stroke="url(#goldG)" stroke-width="7" stroke-linejoin="round"/>
+          <path d="M92 222 C97 208 110 205 120 210" stroke="#fff" stroke-width="8" opacity=".7" stroke-linecap="round" fill="none"/>
+          <circle cx="86" cy="236" r="3.5" fill="#fff" opacity=".7"/>
+        </g>
+      </g>
+
+      <!-- hands + gold watch -->
+      <g fill="#f9d1b0" stroke="#d9a07a" stroke-width="2.5">
+        <ellipse cx="86" cy="292" rx="17" ry="14" transform="rotate(-25 86 292)"/>
+        <ellipse cx="72" cy="275" rx="7" ry="11.5" transform="rotate(-28 72 275)"/>
+        <ellipse cx="214" cy="292" rx="17" ry="14" transform="rotate(25 214 292)"/>
+        <ellipse cx="228" cy="275" rx="7" ry="11.5" transform="rotate(28 228 275)"/>
+      </g>
+      <ellipse cx="76" cy="314" rx="16" ry="7" fill="none" stroke="url(#goldG)" stroke-width="5" transform="rotate(-25 76 314)"/>
+      <circle cx="70" cy="313" r="5.5" fill="#0f0f16" stroke="url(#goldG)" stroke-width="2"/>
+    </svg>
+
+    <h1>آفرین! <span>🎉</span><br>تبریک، شما برنده‌ی قلب سازنده‌ی این بازی شدید</h1>
+    <h2>آیا قبول می‌کنید؟</h2>
+    <div class="choices" id="choices">
+      <button class="yes" id="yes">بلی</button>
+      <button class="no" id="no">نخیر</button>
+    </div>
+    <p class="warn" id="warn" hidden>(روی بلی کلیک کن🫩)</p>
+  </div>
+</section>
+
+<section class="boom" id="boom" hidden aria-live="polite">
+  <canvas id="boomC"></canvas>
+  <div class="boom-text">هورااا هورااا هورااا</div>
+  <div id="pops"></div>
+  <button class="restart" id="restart">از اول</button>
+</section>
+
+<footer>با عشق تقدیم به زینب جون🥹</footer>
+
+<script>
+/* ====== تنظیمات ====== */
+const HINT_AFTER = 8;                          // بعد از چند اشتباه راهنمایی بیاد؛ 0 یعنی هیچ‌وقت
+const HINT_TEXT  = "راهنمایی: ۱۴ و ۱۹ رو جمع کن 😉";
+/* ===================== */
+
+const exprEl = document.getElementById('expr');
+const msgEl  = document.getElementById('msg');
+const screen = document.getElementById('screen');
+const win    = document.getElementById('win');
+const boom   = document.getElementById('boom');
+const SYM = {'+':'+','-':'−','*':'×','/':'÷'};
+const isOp = s => s in SYM;
+const IDLE = 'یه عدد بزن و برابر رو بزن';
+
+let expr = [], tries = 0, locked = false;
+
+function render(){
+  exprEl.textContent = expr.length ? expr.map(t => SYM[t] || t).join(' ') : '0';
+  exprEl.scrollLeft = exprEl.scrollWidth;
+}
+function say(text, bad){ msgEl.textContent = text; msgEl.classList.toggle('bad', !!bad); }
+
+function digit(d){
+  if(locked) return;
+  const last = expr[expr.length-1];
+  if(last !== undefined && !isOp(last)){
+    if(d === '.' && last.includes('.')) return;
+    if(last.length >= 10) return;
+    expr[expr.length-1] = (last === '0' && d !== '.') ? d : last + d;
+  } else {
+    expr.push(d === '.' ? '0.' : d);
+  }
+  say(IDLE); render();
+}
+function operator(o){
+  if(locked || !expr.length) return;
+  if(isOp(expr[expr.length-1])) expr[expr.length-1] = o; else expr.push(o);
+  render();
+}
+function back(){
+  if(locked || !expr.length) return;
+  const last = expr[expr.length-1];
+  if(isOp(last) || last.length <= 1) expr.pop(); else expr[expr.length-1] = last.slice(0,-1);
+  render();
+}
+function clearAll(){ expr = []; render(); }
+
+function equals(){
+  if(locked || !expr.length) return;
+  const s = expr.join('');
+  if(s === '14+19' || s === '19+14') return celebrate();
+  wrong();
+}
+function wrong(){
+  locked = true; tries++;
+  say('اشتباه شد ❌', true);
+  screen.classList.remove('shake'); void screen.offsetWidth; screen.classList.add('shake');
+  setTimeout(()=>{
+    locked = false; clearAll();
+    say(HINT_AFTER && tries >= HINT_AFTER ? HINT_TEXT : IDLE);
+  }, 1100);
+}
+
+/* ===== سؤال بلی / نخیر ===== */
+const choices = document.getElementById('choices');
+const warn = document.getElementById('warn');
+let noCount = 0;
+function applyAsk(){
+  choices.style.setProperty('--yes', Math.min(2.6, 1 + 0.24*noCount).toFixed(2));
+  choices.style.setProperty('--no',  Math.max(0.4, Math.pow(0.8, noCount)).toFixed(2));
+  warn.hidden = noCount <= 3;
+}
+function celebrate(){
+  noCount = 0; applyAsk();
+  win.hidden = false;
+  win.scrollTop = 0;
+}
+document.getElementById('no').onclick = ()=>{ noCount++; applyAsk(); };
+document.getElementById('yes').onclick = startBoom;
+
+/* ===== انفجار قلب‌ها ===== */
+const bc = document.getElementById('boomC'), bx = bc.getContext('2d');
+const pops = document.getElementById('pops');
+const glyphs = ['❤️','💖','💗','💕','💛','✨'];
+const popColors = ['#fff','#ffd37a','#ffb3c9','#ff8fb1','#ffe9a8'];
+let bp = [], boomOn = false, burstTimer = 0, popTimer = 0;
+
+function bsize(){ bc.width = innerWidth*devicePixelRatio; bc.height = innerHeight*devicePixelRatio; }
+function burst(x,y,n){
+  if(bp.length > 700) return;
+  for(let i=0;i<n;i++){
+    const a = Math.random()*Math.PI*2, sp = 3 + Math.random()*10;
+    bp.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-3,s:16+Math.random()*26,
+             g:glyphs[Math.random()*glyphs.length|0],a:1,r:(Math.random()-.5)*.2,rot:0});
+  }
+}
+function bloop(){
+  if(!boomOn) return;
+  bx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  bx.clearRect(0,0,innerWidth,innerHeight);
+  bp = bp.filter(p=>p.a>0 && p.y<innerHeight+60);
+  for(const p of bp){
+    p.x+=p.vx; p.y+=p.vy; p.vx*=.985; p.vy+=.16; p.a-=.007; p.rot+=p.r;
+    bx.save(); bx.globalAlpha=Math.max(p.a,0); bx.translate(p.x,p.y); bx.rotate(p.rot);
+    bx.font=p.s+'px serif'; bx.textAlign='center'; bx.fillText(p.g,0,0); bx.restore();
+  }
+  requestAnimationFrame(bloop);
+}
+function addPop(){
+  const d = document.createElement('div');
+  d.className = 'pop';
+  d.textContent = 'هورااا';
+  d.style.left = (10 + Math.random()*80) + '%';
+  d.style.top  = (8 + Math.random()*72) + '%';
+  d.style.fontSize = (22 + Math.random()*30) + 'px';
+  d.style.color = popColors[Math.random()*popColors.length|0];
+  pops.appendChild(d);
+  setTimeout(()=>d.remove(), 1800);
+}
+function startBoom(){
+  win.hidden = true; boom.hidden = false;
+  boomOn = true; bp = []; bsize();
+  burst(innerWidth/2, innerHeight/2, 170);
+  bloop();
+  burstTimer = setInterval(()=>burst(60 + Math.random()*(innerWidth-120), 80 + Math.random()*(innerHeight*.6), 45), 700);
+  popTimer = setInterval(addPop, 320);
+}
+function stopBoom(){
+  boomOn = false; clearInterval(burstTimer); clearInterval(popTimer);
+  pops.innerHTML = ''; boom.hidden = true;
+}
+document.getElementById('restart').onclick = ()=>{
+  stopBoom(); tries = 0; clearAll(); say(IDLE);
+};
+addEventListener('resize', ()=>{ if(boomOn) bsize(); });
+
+document.querySelector('.keys').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  const k = b.dataset.k;
+  if(k === 'C') clearAll();
+  else if(k === 'B') back();
+  else if(k === '=') equals();
+  else if(isOp(k)) operator(k);
+  else digit(k);
+});
+addEventListener('keydown', e=>{
+  if(!win.hidden || !boom.hidden) return;
+  if(/^[0-9.]$/.test(e.key)) digit(e.key);
+  else if(isOp(e.key)) operator(e.key);
+  else if(e.key === 'Enter' || e.key === '=') { e.preventDefault(); equals(); }
+  else if(e.key === 'Backspace') back();
+  else if(e.key === 'Escape') clearAll();
+});
+render();
+</script>
+
+</body></html>
